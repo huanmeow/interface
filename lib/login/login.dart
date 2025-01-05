@@ -1,5 +1,8 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../SignUp/signup.dart';
 import '../ThanhToan/naptien.dart';
 
 class Login extends StatefulWidget {
@@ -12,25 +15,49 @@ class Login extends StatefulWidget {
 class _HitClubState extends State<Login> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  String _errorMessage ='';
+  String _errorMessage = '';
+  bool _isPasswordVisible = false;
+  bool _rememberMe = false; // Thêm biến ghi nhớ tài khoản
 
-  void _login(){
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedCredentials(); // Tải thông tin đã lưu khi khởi động
+  }
+
+  void _loadSavedCredentials() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? savedUsername = prefs.getString('username');
+    if (savedUsername != null) {
+      _usernameController.text = savedUsername; // Điền tên người dùng đã lưu
+      _rememberMe = true; // Đánh dấu là đã ghi nhớ
+    }
+  }
+
+  Future<void> _login() async {
     final String username = _usernameController.text;
     final String password = _passwordController.text;
-    if (username == 'meohun' && password == '12345'){
+    if (username == 'meohun' && password == '12345') {
       setState(() {
-        _errorMessage='';
+        _errorMessage = '';
       });
-    Navigator.push(
-      context, MaterialPageRoute(builder: (context)=> MyApp()),
-    );
-    }
-    else {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      if (_rememberMe) {
+        prefs.setString('username', username);
+      } else {
+        prefs.remove('username'); // Xóa nếu không ghi nhớ
+      }
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => MyApp()),
+      );
+    } else {
       setState(() {
-        _errorMessage=' Account or Password not exactly !';
+        _errorMessage = 'Account or Password not exactly!';
       });
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,115 +65,186 @@ class _HitClubState extends State<Login> {
           padding: EdgeInsets.fromLTRB(30, 0, 30, 0),
           constraints: BoxConstraints.expand(),
           color: Colors.white,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Padding(
-                padding: EdgeInsets.fromLTRB(0, 0, 0, 40),
-                child: Container(
-                  width: 70,
-                  height: 70,
-                  padding: EdgeInsets.all(15),
-                  decoration: BoxDecoration(
-                      shape: BoxShape.circle, color: Colors.white),
-                  // child: Icon(Icons.accessible_forward),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 0, 0, 60),
-                child: Center(
-                  child: Text(
-                    "LOGIN Mai Meow",
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue,
-                        fontSize: 45  ),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 0, 0, 40),
-                child: TextField(
-                  controller: _usernameController,
-                  style: TextStyle(fontSize: 18, color: Colors.black),
-                  decoration: InputDecoration(
-                      labelText: "Username",
-                      labelStyle:
-                      TextStyle(color: Color(0xff888888), fontSize: 15)),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 0, 0, 40),
-                child: Stack(
-                  alignment: AlignmentDirectional.centerEnd,
-                  children: <Widget>[
-                    TextField(
-                      style: TextStyle(fontSize: 18, color: Colors.black),
-                      obscureText: true,
-                      controller: _passwordController,
-                      decoration: InputDecoration(
-                          labelText: "Password",
-                          labelStyle:
-                          TextStyle(color: Color(0xff888888), fontSize: 15)),
-                    ),
-                    Text(
-                      "Show",
-                      style: TextStyle(
-                        color: Colors.blue,
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
+          child: Column(children: <Widget>[
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(0, 0, 0, 40),
+                    child: Container(
+                      width: 70,
+                      height: 70,
+                      padding: EdgeInsets.all(15),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white,
                       ),
-                    )
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 0, 0, 40),
-                child: Center(
-                  child: ElevatedButton(
-
-                      onPressed: () {  },
-                      child: TextButton(
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 20.0),
+                    child: Center(
+                      child: Image.network(
+                        'https://hitclub.com/wp-content/uploads/2024/05/hit-club.webp',
+                        width: 115,
+                        height: 102, // Adjust height as needed
+                        fit: BoxFit.cover, // Adjust the fit as needed
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 60),
+                    child: Center(
+                      child: Text(
+                        "Mai Meow",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue,
+                          fontSize: 45,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 40),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: TextField(
+                        controller: _usernameController,
+                        style: TextStyle(fontSize: 18, color: Colors.black),
+                        decoration: InputDecoration(
+                          labelText: "Tài khoản",
+                          labelStyle: TextStyle(color: Color(0xff888888), fontSize: 15),
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.all(15),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 40),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(10), // Rounded corners
+                      ),
+                      child: Stack(
+                        alignment: AlignmentDirectional.centerEnd,
+                        children: <Widget>[
+                          TextField(
+                            style: TextStyle(fontSize: 18, color: Colors.black),
+                            obscureText: !_isPasswordVisible, // Toggle visibility
+                            controller: _passwordController,
+                            decoration: InputDecoration(
+                              labelText: "Mật khẩu",
+                              labelStyle: TextStyle(color: Color(0xff888888), fontSize: 15),
+                              border: InputBorder.none, // Remove default border
+                              contentPadding: EdgeInsets.all(15), // Padding inside TextField
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(20.0),
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _isPasswordVisible = !_isPasswordVisible; // Toggle visibility
+                                });
+                              },
+                              child: Text(
+                                _isPasswordVisible ? "Ẩn" : "Hiện", // Change text based on visibility
+                                style: TextStyle(
+                                  color: Colors.blue,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (_errorMessage.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 20.0),
+                      child: Text(
+                        _errorMessage,
+                        style: TextStyle(color: Colors.red, fontSize: 16),
+                      ),
+                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      Checkbox(
+                        value: _rememberMe,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            _rememberMe = value ?? false;
+                          });
+                        },
+                      ),
+                      Text("Nhớ tài khoản"),
+                    ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 40),
+                    child: Center(
+                      child: ElevatedButton(
                         onPressed: () {
-                          Navigator.push(
-                            context, MaterialPageRoute(builder: (context)=> MyApp())
-                          );
+                          _login();
                         },
                         child: Text(
-                          "Login",
+                          "Đăng nhập",
                           style: TextStyle(fontSize: 17, color: Colors.blue),
                         ),
-                      )),
-                ),
-              ),
-           //container
-              SizedBox(
-                height: 130,
-                width: double.infinity,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    TextButton(onPressed: (){},
-                        child: Text('Forget Password')),
-                    RichText(text: TextSpan(
-                        children: <TextSpan>[
-                          TextSpan(
-                            text: 'You have not an account,',
-                            style: TextStyle(fontSize: 20, color: Colors.black),
+                      ),
+                    ),
+                  ),
+                  // Container
+                  SizedBox(
+                    height: 130,
+                    width: double.infinity,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        TextButton(
+                          onPressed: () {}, // Thêm logic cho "Forget Password" nếu cần
+                          child: Text('Quên mật khẩu'),
+                        ),
+                        RichText(
+                          text: TextSpan(
+                            children: <TextSpan>[
+                              TextSpan(
+                                text: 'Bạn chưa có tài khoản? ,',
+                                style: TextStyle(fontSize: 15, color: Colors.black),
+                              ),
+                              TextSpan(
+                                text: 'Đăng kí?',
+                                style: TextStyle(fontSize: 15, color: Colors.blue),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => SignUp()),
+                                    ); //
+                                  },
+                              )
+                            ],
                           ),
-                          TextSpan(
-                            text: 'Sign up ?',
-                            style: TextStyle(fontSize: 20, color: Colors.blue),
-                          )
-                        ]
-                    )
-                    )
-                  ],
-                ),
+                        )
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ],
+            )
+          ],
           ),
-        )
-    );
-  }}
+        ));
+  }
+}

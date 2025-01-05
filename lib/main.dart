@@ -14,13 +14,12 @@ class MyApp1 extends StatefulWidget {
 class _MyApp1State extends State<MyApp1> {
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-        child: Scaffold(
-            body: const Login(
-
-
-            )
-        )
+    return MaterialApp(
+      home: Login(),
+      debugShowCheckedModeBanner: false, // Remove the debug banner
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
     );
   }
 }
