@@ -1,9 +1,10 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../Animation/animated_text.dart';
+import '../InterfaceMain/screenmain.dart';
+import '../SignUp/forgetpass.dart';
 import '../SignUp/signup.dart';
-import '../ThanhToan/naptien.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -12,7 +13,7 @@ class Login extends StatefulWidget {
   State<Login> createState() => _HitClubState();
 }
 
-class _HitClubState extends State<Login> {
+class _HitClubState extends State<Login> with SingleTickerProviderStateMixin {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   String _errorMessage = '';
@@ -22,14 +23,17 @@ class _HitClubState extends State<Login> {
   @override
   void initState() {
     super.initState();
-    _loadSavedCredentials(); // Tải thông tin đã lưu khi khởi động
-  }
+    _loadSavedCredentials();
+    // Tải thông tin đã lưu khi khởi động
 
+  }
   void _loadSavedCredentials() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? savedUsername = prefs.getString('username');
-    if (savedUsername != null) {
-      _usernameController.text = savedUsername; // Điền tên người dùng đã lưu
+    String? savePass = prefs.getString('password');
+    if (savedUsername != null && savePass != null) {
+      _usernameController.text = savedUsername;
+      _passwordController.text = savePass;
       _rememberMe = true; // Đánh dấu là đã ghi nhớ
     }
   }
@@ -44,16 +48,19 @@ class _HitClubState extends State<Login> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       if (_rememberMe) {
         prefs.setString('username', username);
+        prefs.setString('password', password);
       } else {
-        prefs.remove('username'); // Xóa nếu không ghi nhớ
+        prefs.remove('username');
+        prefs.remove('password');
+        // Xóa nếu không ghi nhớ
       }
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => MyApp()),
+        MaterialPageRoute(builder: (context) => TaiXiuScreen()),
       );
     } else {
       setState(() {
-        _errorMessage = 'Account or Password not exactly!';
+        _errorMessage = 'Tài khoản hoặc mật khẩu không chính xác!';
       });
     }
   }
@@ -94,26 +101,15 @@ class _HitClubState extends State<Login> {
                       ),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 60),
-                    child: Center(
-                      child: Text(
-                        "Mai Meow",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue,
-                          fontSize: 45,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 40),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+
+                        AnimatedText(),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(0, 0, 0, 40),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                       child: TextField(
                         controller: _usernameController,
                         style: TextStyle(fontSize: 18, color: Colors.black),
@@ -169,6 +165,7 @@ class _HitClubState extends State<Login> {
                       ),
                     ),
                   ),
+
                   if (_errorMessage.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 20.0),
@@ -213,8 +210,13 @@ class _HitClubState extends State<Login> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
                         TextButton(
-                          onPressed: () {}, // Thêm logic cho "Forget Password" nếu cần
-                          child: Text('Quên mật khẩu'),
+                          onPressed: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context)=>ForgotPassword()),
+                            );
+                          }, // Thêm logic cho "Forget Password" nếu cần
+                          child: Text('Quên mật khẩu',style: TextStyle(color: Colors.blue),),
                         ),
                         RichText(
                           text: TextSpan(
