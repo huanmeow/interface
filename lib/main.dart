@@ -4,10 +4,6 @@ import 'package:flutter/material.dart';
 
 import 'login/login.dart';
 
-void main(){
-  runApp(const MyApp1());
-  }
-
 class MyApp1 extends StatefulWidget {
   const MyApp1({super.key});
   @override
